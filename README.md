@@ -13,6 +13,6 @@ python import.py
 ```
 
 run different rag scripts
-```
+```console
 python retriever.py
 ```
