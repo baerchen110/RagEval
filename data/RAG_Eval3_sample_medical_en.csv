@@ -1,0 +1,19 @@
+question,answer,groundedness score,relevance score,standalone Score,Question ID
+What is the dosage of labetalol prescribed for long-term management?,200 mg orally twice daily,5,4,3,21
+What type of medical order is CBC daily classified as?,Temporary Orders,5,3,3,50
+Who confirmed the diagnosis and treatment plan during senior physician rounds?,Dr. L. Anderson,5,3,3,113
+Which type of anemia is ruled out by high ferritin levels?,Iron deficiency anemia,5,4,3,205
+What therapy is ordered temporarily upon confirmation of high iron levels?,Iron chelation therapy.,5,3,3,216
+What type of antibiotics are listed under long-term medical orders?,IV antibiotics,5,3,3,270
+What procedure was performed to treat acute angle-closure glaucoma?,Laser trabeculoplasty.,5,5,3,289
+What medication was initiated for the treatment of Type 2 Diabetes Mellitus?,Metformin 500 mg twice daily.,5,4,3,315
+What is the fetal heart rate during the obstetric examination at 28 weeks gestation?,145 bpm,5,4,3,333
+What is the primary treatment used for managing intraocular pressure in the patient with primary open-angle glaucoma?,Topical beta-blockers.,5,5,3,341
+What family history is reported regarding health conditions?,Mother has mild anemia; no other relevant genetic diseases reported.,4,4,3,355
+What type of consent is obtained for CT scans and audiology assessments?,Special Examination Consent,5,4,3,405
+Is consent for psychiatric evaluation obtained?,"Yes, consent for psychiatric evaluation obtained.",5,5,3,438
+What type of medical test confirmed impairment corresponding to cataract severity?,Visual acuity test.,5,3,3,543
+What type of consent is obtained for specialist evaluations?,Special Examination Consent,5,3,3,559
+What is the pulse rate during the physical examination?,98 bpm,5,3,3,565
+What type of consent is obtained for ophthalmological imaging and intraocular pressure monitoring?,Special Examination Consent,5,4,3,571
+What type of consent is obtained for an endoscopy?,Special Examination Consent,5,4,4,574

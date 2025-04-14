@@ -1,0 +1,23 @@
+{
+  "properties": {
+    "content": {
+      "type": "text"
+    },
+    "doc_id": {
+      "type": "long"
+    },
+    "domain": {
+      "type": "keyword"
+    },
+    "hospital_patient_name": {
+      "type": "keyword"
+    },
+    "language": {
+      "type": "keyword"
+    },
+    "content_semantic": {
+      "type": "semantic_text",
+      "inference_id": "my-elser-endpoint"
+    }
+  }
+}

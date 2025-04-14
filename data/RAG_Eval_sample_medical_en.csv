@@ -1,0 +1,51 @@
+question,answer,groundedness_score,relevance_score,standalone_score
+What congenital heart defect was diagnosed in the patient?,Ventricular septal defect (VSD).,5,4,1
+What are the chief symptoms reported by M. Bailey during his hospital admission?,"Fever, joint pain, and shortness of breath for 2 weeks.",5,2,1
+What is the temperature recorded during the physical examination?,36.8°C,5,4,1
+What is the preliminary diagnosis in the context provided?,Schizophrenia,5,3,1
+What was the diagnosis given to the neonate in the post-admission course records?,Neonatal Pneumonia due to Amniotic Fluid Aspiration.,5,2,1
+What allergies does Q. Gomez have?,Allergic to penicillin.,5,1,1
+What is the suspected diagnosis of the 8-hour-old male patient?,Neonatal tetanus.,5,3,1
+What were the results of the thyroid function test?,"Elevated Thyroxine (T4) and Triiodothyronine (T3) levels, suppressed Thyroid-Stimulating Hormone (TSH).",5,5,1
+What is L. Brown's occupation?,Software Engineer,5,1,1
+What is the occupation of Y. Evans?,Teacher,5,1,1
+"What is the medical condition characterized by skin rashes, papules, blisters, and lichenification?",Dermatitis,5,4,4
+What is the occupation of A. Diaz?,Software Engineer,5,1,1
+What was the preliminary diagnosis for the patient?,Hepatitis A,5,4,1
+What was the marital status of the patient?,Widowed.,5,2,1
+Who signed the admission records for the patient?,Dr. J. Smith,5,2,2
+What is the preliminary diagnosis in the context?,Favism leading to acute hemolytic anemia.,5,2,1
+What was the patient's preliminary diagnosis?,Community-acquired pneumonia,5,4,1
+What disease is the patient diagnosed with in the records?,Mastoiditis,5,4,1
+Where does the individual reside?,"72, Ashland street, Parker",5,2,1
+What are the main symptoms of malaria?,"The main symptoms of malaria are chills, high fever, sweating, headache, limb aches, and fatigue.",5,5,5
+What type of surgery was performed on the patient with severe mastoiditis?,Mastoidectomy.,5,4,2
+What was the temperature on January 27?,38°C,5,1,1
+What condition was the patient admitted with?,Acute angle-closure glaucoma.,5,4,1
+Who reviewed the patient during the senior physician rounds on Day 3?,Dr. Smith,5,1,1
+What is the preliminary diagnosis?,Acute angle-closure glaucoma,5,2,1
+What is the rate of IV fluid administration in ml/hr?,75 ml/hr,5,3,1
+What is the preliminary diagnosis based on the context?,Iron Deficiency Anemia,5,4,1
+What is the patient's diagnosed condition?,Acute mastoiditis.,5,5,1
+What was Q. Reyes diagnosed with after undergoing an endoscopy and biopsy?,Esophageal malignancy.,5,2,1
+What is K. Moore allergic to?,Penicillin,5,1,1
+What was L. Rogers diagnosed with by the optometrist 2 months ago?,Early-stage cataract.,5,1,1
+What was H. Nelson's main complaint for seeking medical attention?,Fatigue and weakness for the past three months.,5,2,1
+What is the occupation of H. Sanchez?,Teacher,5,1,1
+What is the patient's temperature during the physical examination?,38.2°C,5,3,1
+What is the suspected cause of the newborn's respiratory distress and cyanosis?,Amniotic fluid aspiration.,5,5,1
+What type of disease is Parkinson's Disease classified as?,Diseases of the Nervous System,5,4,4
+What is the status of the blood transfusion consent?,Not applicable.,5,4,1
+Who reviewed the treatment plan on 22nd October?,Dr. Steven Miller.,5,2,2
+What hospital is Y. Mendoza admitted to?,Victoria General Hospital,5,1,1
+What is the chief complaint for which K. Mendoza was hospitalized?,Tremors in hands and slow movement for 6 months.,5,2,1
+What was the diagnosis from the CT scan conducted outside the hospital for E. Cruz?,Pituitary tumor,5,1,1
+What is the preliminary diagnosis for the patient based on the thyroid function test and symptoms?,Hyperthyroidism.,5,5,1
+"What disease is associated with symptoms such as wheezing, coughing, and shortness of breath in the context provided?",Asthma,5,4,1
+What is the patient's allergy history?,Allergic to penicillin (rash).,5,5,1
+What was the preliminary diagnosis for the patient?,Malaria,5,4,1
+What condition was confirmed by Doppler ultrasound in the right lower limb?,Severe blood reflux in superficial veins.,5,4,1
+What caused Z. Walker's symptoms to begin on 19th October?,Consuming a meal at a local restaurant.,5,2,1
+What was the patient's rheumatoid factor status in the auxiliary examination reports?,Positive,5,5,1
+What is K. Ramos allergic to?,Shellfish.,5,1,1
+What was the blood pressure reading of the patient?,150/95 mmHg,5,2,1

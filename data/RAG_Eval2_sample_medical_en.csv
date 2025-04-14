@@ -1,0 +1,9 @@
+question,answer,groundedness_score,relevance_score,standalone_score
+What type of follow-up is recommended after discharge for the patient with asthma exacerbation?,Follow-up with primary care in 1 week.,5,4,3
+"What kind of syndrome is associated with hypertension, edema, and proteinuria during pregnancy?",Pregnancy-Induced Hypertension Syndrome.,5,5,5
+What type of disease is Parkinson's Disease categorized under?,Diseases of the Nervous System,5,3,5
+What are the main symptoms of malaria?,"The main symptoms of malaria are chills, high fever, sweating, headache, limb aches, and fatigue.",5,5,4
+What are some symptoms of dermatitis?,"Skin rashes, papules, blisters, and lichenification.",5,3,4
+What condition is suggested by elevated T4 and T3 levels and a suppressed TSH in the thyroid function test?,Hyperthyroidism,5,5,5
+What type of diseases is asthma associated with?,Respiratory System Diseases,5,4,4
+What is one symptom of a peptic ulcer?,Upper abdominal pain.,5,3,5

@@ -1,0 +1,11 @@
+{
+  "description": "Ingest pipeline created by text structure finder",
+  "processors": [
+    {
+      "set": {
+        "field": "content_semantic",
+        "copy_from": "content"
+      }
+    }
+  ]
+}
