@@ -95,12 +95,15 @@ if __name__ == "__main__":
         outputs = []
 
     for path in ANSWER_PATH:
+        print(f"Loading: File '{path}'")
+
         if not os.path.exists(path):
             print(f"Error: File '{path}' not found.")
 
         try:
             with open(path, 'r') as file:
                 data = json.load(file)
+                total_scores = []
                 for doc in data:
 
                     question = doc.get('question')
@@ -108,9 +111,6 @@ if __name__ == "__main__":
                     ref_anwser = doc.get('answer')
                     generated_answer = doc.get('generated_answer')
 
-                    total_scores = []
-
-                    #vector
                     eval_prompt = evaluation_prompt_template.format_messages(
                         instruction=question,
                         response=generated_answer,
@@ -144,6 +144,9 @@ if __name__ == "__main__":
                         "path": path,
                     }
                     outputs.append(result)
+
+                    with open(output_file, "w") as f:
+                        json.dump(outputs, f)
                 else:
                     print("No valid scores were calculated")
 
