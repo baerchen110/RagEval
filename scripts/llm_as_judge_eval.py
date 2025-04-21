@@ -30,7 +30,8 @@ API_TYPE = os.environ.get("AZURE_OPENAI_TYPE", "azure")
 API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
-ANSWER_PATH = '../data/RAG_EVAL3_results.csv'
+ANSWER_PATH = ["../data/fulltext_answers.json", "../data/hybrid_answers.json", "../data/vector_answers.json", "../data/rerank_answers.json"]
+OUTPUT_FILE_EVALUATION = '../data/eval.json'
 
 
 openai_client = AzureOpenAI(api_version=API_VERSION,
@@ -85,106 +86,67 @@ evaluation_prompt_template = ChatPromptTemplate.from_messages(
 
 
 if __name__ == "__main__":
-    if not os.path.exists(ANSWER_PATH):
-        print(f"Error: File '{ANSWER_PATH}' not found.")
 
-    try:
-        with open(ANSWER_PATH, 'r', newline='', encoding='utf-8') as file:
-            csv_reader = csv.DictReader(file)
+    output_file = OUTPUT_FILE_EVALUATION
+    try:  # load previous generations if they exist
+        with open(output_file, "r") as out_f:
+            outputs = json.load(out_f)
+    except:
+        outputs = []
 
-            # Check if required columns exist
-            required_columns = ['question', 'ref', 'vector', 'bm25', 'rrf']
-            header = csv_reader.fieldnames
+    for path in ANSWER_PATH:
+        if not os.path.exists(path):
+            print(f"Error: File '{path}' not found.")
 
-            if not all(col in header for col in required_columns):
-                missing_cols = [col for col in required_columns if col not in header]
-                print(f"Error: Missing columns in CSV file: {', '.join(missing_cols)}")
+        try:
+            with open(path, 'r') as file:
+                data = json.load(file)
+                for doc in data:
 
-            total_scores_vector = []
-            total_scores_bm25 = []
-            total_scores_rrf = []
+                    question = doc.get('question')
+                    context = doc.get('context')
+                    ref_anwser = doc.get('answer')
+                    generated_answer = doc.get('generated_answer')
 
-            # Process each row
-            for row in csv_reader:
-                question = row['question']
-                ref = row['ref']
-                vector = row['vector']
-                bm25 = row['bm25']
-                rrf = row['rrf']
+                    total_scores = []
 
-                #vector
-                eval_prompt = evaluation_prompt_template.format_messages(
-                    instruction=question,
-                    response=vector,
-                    reference_answer=ref,
-                )
+                    #vector
+                    eval_prompt = evaluation_prompt_template.format_messages(
+                        instruction=question,
+                        response=generated_answer,
+                        reference_answer=ref_anwser,
+                    )
 
-                eval_result = llm_client.invoke(eval_prompt)
+                    eval_result = llm_client.invoke(eval_prompt)
 
-                feedback, score = [
-                    item.strip() for item in eval_result.content.split("[RESULT]")
-                ]
+                    feedback, score = [
+                        item.strip() for item in eval_result.content.split("[RESULT]")
+                    ]
 
-                total_scores_vector.append(int(score))
+                    total_scores.append(int(score))
 
-                #rrf
-                eval_prompt = evaluation_prompt_template.format_messages(
-                    instruction=question,
-                    response=rrf,
-                    reference_answer=ref,
-                )
+                    print(f"Question: {question}")
+                    print(f"Ref: {ref_anwser}")
+                    print(f"Answer: {generated_answer}")
+                    print(f"score: {score}")
+                    print(f"feedback: {feedback}")
+                    print("-" * 50)  # Print a separator between rows
 
-                eval_result = llm_client.invoke(eval_prompt)
+                if total_scores:
+                    average_score = sum(total_scores) / len(total_scores)
+                    print(f"\nAverage Score: {average_score:.2f}/5.00")
+                    print(f"Total Evaluated: {len(total_scores)} questions")
+                    print(f"\nfile: {path}")
 
-                feedback, score = [
-                    item.strip() for item in eval_result.content.split("[RESULT]")
-                ]
-
-                total_scores_rrf.append(int(score))
-
-                #bm25
-                eval_prompt = evaluation_prompt_template.format_messages(
-                    instruction=question,
-                    response=bm25,
-                    reference_answer=ref,
-                )
-
-                eval_result = llm_client.invoke(eval_prompt)
-
-                feedback, score = [
-                    item.strip() for item in eval_result.content.split("[RESULT]")
-                ]
-
-                total_scores_bm25.append(int(score))
+                    result = {
+                        "average_score": average_score,
+                        "total_questions": len(total_scores),
+                        "path": path,
+                    }
+                    outputs.append(result)
+                else:
+                    print("No valid scores were calculated")
 
 
-                print(f"Question: {question}")
-                print(f"Ref: {ref}")
-                print(f"Vector: {vector}")
-                print(f"score: {score}")
-                print(f"feedback: {feedback}")
-                print("-" * 50)  # Print a separator between rows
-
-            if total_scores_vector:
-                average_score = sum(total_scores_vector) / len(total_scores_vector)
-                print(f"\nAverage Score vector: {average_score:.2f}/5.00")
-                print(f"Total Evaluated: {len(total_scores_vector)} questions")
-            else:
-                print("No valid scores were calculated")
-
-            if total_scores_rrf:
-                average_score = sum(total_scores_rrf) / len(total_scores_rrf)
-                print(f"\nAverage Score rrf: {average_score:.2f}/5.00")
-                print(f"Total Evaluated: {len(total_scores_rrf)} questions")
-            else:
-                print("No valid scores were calculated")
-
-            if total_scores_bm25:
-                average_score = sum(total_scores_bm25) / len(total_scores_bm25)
-                print(f"\nAverage Score bm25: {average_score:.2f}/5.00")
-                print(f"Total Evaluated: {len(total_scores_bm25)} questions")
-            else:
-                print("No valid scores were calculated")
-
-    except Exception as e:
-        print(f"Error processing file: {e}")
+        except Exception as e:
+            print(f"Error processing file: {e}")

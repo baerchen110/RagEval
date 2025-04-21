@@ -20,7 +20,7 @@ API_TYPE = os.environ.get("AZURE_OPENAI_TYPE", "azure")
 API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
-OUTPUT_FILE_QUESTIONS = '../data/RAG_Eval3_sample_medical_en.csv'
+OUTPUT_FILE_QUESTIONS = '../data/med_ground_truth.json'
 OUTPUT_FILE_ANSWERS = '../data/hybrid_answers.json'
 
 es_client = Elasticsearch(
@@ -137,25 +137,29 @@ if __name__ == "__main__":
     except:
         outputs = []
 
-    file_name = OUTPUT_FILE_QUESTIONS
-    data = pd.read_csv(file_name)
-    # Extract the 'question' column
-    questions = data['question'].tolist()
-    for question in questions:
-        time.sleep(random.random() * 10)
-        elasticsearch_results = get_elasticsearch_results(question)
-        context_prompt = create_openai_prompt(elasticsearch_results)
-        openai_completion = generate_openai_completion(context_prompt, question)
-        print(f"\n**Question :**")
-        print(question)
-        print("**Answer:**")
-        print(openai_completion)
-        print("-" * 50)
+    with open(OUTPUT_FILE_QUESTIONS, 'r') as file:
+        data = json.load(file)
+        for doc in data:
+            question = doc.get('question')
+            context = doc.get('context')
+            ref_anwser = doc.get('answer')
 
-        result = {
-            "question": question,
-            "generated_answer": openai_completion
-        }
-        outputs.append(result)
-        with open(output_file, "w") as f:
-            json.dump(outputs, f)
+            time.sleep(random.random() * 1)
+            elasticsearch_results = get_elasticsearch_results(question)
+            context_prompt = create_openai_prompt(elasticsearch_results)
+            openai_completion = generate_openai_completion(context_prompt, question)
+            print(f"\n**Question :**")
+            print(question)
+            print("**Answer:**")
+            print(openai_completion)
+            print("-" * 50)
+
+            result = {
+                "question": question,
+                "context": context,
+                "ref_answer": ref_anwser,
+                "generated_answer": openai_completion
+            }
+            outputs.append(result)
+            with open(output_file, "w") as f:
+                json.dump(outputs, f)

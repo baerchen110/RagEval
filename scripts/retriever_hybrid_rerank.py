@@ -5,6 +5,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from dotenv import dotenv_values
 import os
+import json
 from openai import AzureOpenAI
 import pandas as pd
 import time
@@ -21,11 +22,16 @@ API_TYPE = os.environ.get("AZURE_OPENAI_TYPE", "azure")
 API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
-OUTPUT_FILE_QUESTIONS = '../data/RAG_Eval3_sample_medical_en.csv'
+OUTPUT_FILE_QUESTIONS = '../data/med_ground_truth.json'
+OUTPUT_FILE_ANSWERS = '../data/rerank_answers.json'
+CID = os.getenv("ES_CID")
+ES_USER = os.getenv("ES_USER")
+ES_PASS = os.getenv("ES_PWD")
+
 
 es_client = Elasticsearch(
-    cloud_id=os.environ["ES_CID"],
-    basic_auth=(os.environ["ES_USER"], os.environ["ES_PWD"])
+    cloud_id=CID,
+    basic_auth=(ES_USER, ES_PASS)
 )
 
 openai_client = AzureOpenAI(api_version=API_VERSION,
@@ -142,17 +148,36 @@ def generate_openai_completion(user_prompt, question):
 
 
 if __name__ == "__main__":
-    file_name = OUTPUT_FILE_QUESTIONS
-    data = pd.read_csv(file_name)
-    # Extract the 'question' column
-    questions = data['question'].tolist()
-    for question in questions:
-        time.sleep(random.random() * 1000)
-        elasticsearch_results = get_elasticsearch_results(question)
-        context_prompt = create_openai_prompt(elasticsearch_results)
-        openai_completion = generate_openai_completion(context_prompt, question)
-        print(f"\n**Question :**")
-        print(question)
-        print("**Answer:**")
-        print(openai_completion)
-        print("-" * 50)
+    output_file = OUTPUT_FILE_ANSWERS
+    try:  # load previous generations if they exist
+        with open(output_file, "r") as f:
+            outputs = json.load(f)
+    except:
+        outputs = []
+
+    with open(OUTPUT_FILE_QUESTIONS, 'r') as file:
+        data = json.load(file)
+        for doc in data:
+            question = doc.get('question')
+            context = doc.get('context')
+            ref_anwser = doc.get('answer')
+
+            time.sleep(random.random() * 10)
+            elasticsearch_results = get_elasticsearch_results(question)
+            context_prompt = create_openai_prompt(elasticsearch_results)
+            openai_completion = generate_openai_completion(context_prompt, question)
+            print(f"\n**Question :**")
+            print(question)
+            print("**Answer:**")
+            print(openai_completion)
+            print("-" * 50)
+
+            result = {
+                "question": question,
+                "context": context,
+                "ref_answer": ref_anwser,
+                "generated_answer": openai_completion
+            }
+            outputs.append(result)
+            with open(output_file, "w") as f:
+                json.dump(outputs, f)
