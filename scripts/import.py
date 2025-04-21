@@ -11,6 +11,7 @@ from tqdm import tqdm
 import pandas as pd
 from IPython.display import display
 import datasets
+import json
 
 # Load environment variables from .env file
 if os.path.exists(".env"):
@@ -24,6 +25,7 @@ API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
 RAW_DATA_FILE = "../data/dragonball_docs_med_en_1.json"
+OUTPUT_GROUND_TRUTH_FILE = "../data/med_ground_truth.json"
 
 loader = JSONLoader(
     file_path=RAW_DATA_FILE,
@@ -250,12 +252,27 @@ display(
         [
             "question",
             "answer",
+            "context",
             "groundedness_score",
             "relevance_score",
             "standalone_score",
         ]
     ]
 )
+
+output_file = OUTPUT_GROUND_TRUTH_FILE
+try:  # load previous generations if they exist
+    with open(output_file, "r") as f:
+        outputs = json.load(f)
+except:
+    outputs = []
+
+# Convert DataFrame to dictionary with records orientation
+generated_questions_dict = generated_questions.to_dict(orient='records')
+outputs.append(generated_questions_dict)
+
+with open(output_file, "w") as f:
+    json.dump(outputs, f)
 
 eval_dataset = datasets.Dataset.from_pandas(
     generated_questions, split="train", preserve_index=False

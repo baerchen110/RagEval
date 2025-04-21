@@ -5,8 +5,12 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from dotenv import dotenv_values
 import os
+import json
 from openai import AzureOpenAI
 import pandas as pd
+import time
+import random
+
 
 
 # Load environment variables from .env file
@@ -21,6 +25,7 @@ API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
 OUTPUT_FILE_QUESTIONS = '../data/RAG_Eval3_sample_medical_en.csv'
+OUTPUT_FILE_ANSWERS = '../data/fulltext_answers.json'
 
 es_client = Elasticsearch(
     cloud_id=os.environ["ES_CID"],
@@ -100,11 +105,19 @@ def generate_openai_completion(user_prompt, question):
 
 
 if __name__ == "__main__":
+    output_file = OUTPUT_FILE_ANSWERS
+    try:  # load previous generations if they exist
+        with open(output_file, "r") as f:
+            outputs = json.load(f)
+    except:
+        outputs = []
+
     file_name = OUTPUT_FILE_QUESTIONS
     data = pd.read_csv(file_name)
     # Extract the 'question' column
     questions = data['question'].tolist()
     for question in questions:
+        time.sleep(random.random() * 10)
         elasticsearch_results = get_elasticsearch_results(question)
         context_prompt = create_openai_prompt(elasticsearch_results)
         openai_completion = generate_openai_completion(context_prompt, question)
@@ -113,3 +126,11 @@ if __name__ == "__main__":
         print("**Answer:**")
         print(openai_completion)
         print("-" * 50)
+
+        result = {
+            "question": question,
+            "generated_answer": openai_completion
+        }
+        outputs.append(result)
+        with open(output_file, "w") as f:
+            json.dump(outputs, f)
