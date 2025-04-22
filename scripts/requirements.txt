@@ -18,3 +18,4 @@ jq
 chainlit
 langchain_openai
 ragas
+plotly
