@@ -11,12 +11,10 @@ from tqdm import tqdm
 import pandas as pd
 from IPython.display import display
 import datasets
-import json
 
 # Load environment variables from .env file
 if os.path.exists(".env"):
     load_dotenv(override=True)
-    config = dotenv_values(".env")
 
 API_BASE = os.getenv("AZURE_OPENAI_BASE")
 API_KEY = os.getenv("AZURE_OPENAI_KEY")

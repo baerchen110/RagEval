@@ -68,7 +68,7 @@ def get_elasticsearch_results(query:str):
                                     }
                                 },
                                 "inner_hits": {
-                                    "size": 5,
+                                    "size": 50,
                                     "name": "eval-rag-medical-en-1.content_semantic",
                                     "_source": [
                                         "content_semantic.inference.chunks.text"
@@ -78,7 +78,9 @@ def get_elasticsearch_results(query:str):
                         }
                   }
                 }
-              ]
+              ],
+              "rank_window_size": 20,
+              "rank_constant": 200
             }
           },
         "size": 3
@@ -100,15 +102,13 @@ def create_openai_prompt(results):
             hit_context = hit["_source"][source_field]
             context += f"{hit_context}\n"
     prompt = f"""
-  Instructions:
-
-  - You are an assistant for question-answering tasks.
-  - Give a comprehensive answer to the question.
-  - Answer questions truthfully and factually using only the context presented.
-  - Provide the number of the source document when relevant.
-  - If the answer cannot be deduced from the context, do not give an answer.
-  - Respond only to the question asked, response should be concise and relevant to the question.
-  - You are correct, factual, precise, and reliable.
+    <|system|>
+    Using the information contained in the context,
+    give a comprehensive answer to the question.
+    Respond only to the question asked, response should be concise and relevant to the question.
+    Provide the number of the source document when relevant.
+    If the answer cannot be deduced from the context, do not give an answer.</s>
+    <|user|>
 
   Context:
   {context}

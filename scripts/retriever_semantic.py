@@ -59,7 +59,7 @@ def get_elasticsearch_results(query:str):
                             }
                         },
                         "inner_hits": {
-                            "size": 2,
+                            "size": 50,
                             "name": "eval-rag-medical-en-1.content_semantic",
                             "_source": [
                                 "content_semantic.inference.chunks.text"
@@ -69,7 +69,7 @@ def get_elasticsearch_results(query:str):
                 }
             }
         },
-        "size": 1
+        "size": 3
     }
     result = es_client.search(index="eval-rag-medical-en-1", body=es_query)
     return result["hits"]["hits"]
