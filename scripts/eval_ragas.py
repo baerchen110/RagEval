@@ -24,7 +24,7 @@ API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
 ANSWER_PATH = ["../data/fulltext_answers.json", "../data/hybrid_answers.json", "../data/vector_answers.json", "../data/rerank_answers.json"]
-OUTPUT_FILE_EVALUATION = '../data/eval_ragas.json'
+OUTPUT_FILE_EVALUATION = '../data/eval/eval_ragas.json'
 
 API_VERSION_EMBEDDING = os.getenv("AZURE_API_VERSION_EMBEDDING")
 ENGINE_EMBEDDING = os.getenv("AZURE_ENGINE_EMBEDDING")

@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Load JSON data
-with open('../data/eval.json', 'r') as f:
+with open('../data/eval/eval.json', 'r') as f:
     data = json.load(f)
 
 # Extract data for plotting

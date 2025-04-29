@@ -77,16 +77,20 @@ def get_elasticsearch_results(query:str):
 
 def create_openai_prompt(results):
     context = ""
+    raw_context = []
     for hit in results:
         inner_hit_path = f"{hit['_index']}.{index_source_fields.get(hit['_index'])[0]}"
         ## For semantic_text matches, we need to extract the text from the inner_hits
         if 'inner_hits' in hit and inner_hit_path in hit['inner_hits']:
             context += '\n --- \n'.join(
                 inner_hit['_source']['text'] for inner_hit in hit['inner_hits'][inner_hit_path]['hits']['hits'])
+            for inner_hit in hit['inner_hits'][inner_hit_path]['hits']['hits']:
+                raw_context.append(inner_hit['_source']['text'])
         else:
             source_field = index_source_fields.get(hit["_index"])[0]
-            hit_context = hit["_source"][source_field]
+            hit_context = hit["_source"][source_field]['text']
             context += f"{hit_context}\n"
+            raw_context.append(hit_context)
     prompt = f"""
     <|system|>
     Using the information contained in the context,
@@ -100,7 +104,7 @@ def create_openai_prompt(results):
   {context}
 
   """
-    return prompt
+    return prompt, raw_context
 
 
 def generate_openai_completion(user_prompt, question):
@@ -129,10 +133,10 @@ if __name__ == "__main__":
             question = doc.get('question')
             context = doc.get('context')
             ref_anwser = doc.get('answer')
-
+            raw_context = []
             time.sleep(random.random() * 1)
             elasticsearch_results = get_elasticsearch_results(question)
-            context_prompt = create_openai_prompt(elasticsearch_results)
+            context_prompt, raw_context = create_openai_prompt(elasticsearch_results)
             openai_completion = generate_openai_completion(context_prompt, question)
             print(f"\n**Question :**")
             print(question)
@@ -142,8 +146,9 @@ if __name__ == "__main__":
 
             result = {
                 "question": question,
-                "context": context,
+                "ref_context": context,
                 "ref_answer": ref_anwser,
+                "retrieved_context": raw_context,
                 "generated_answer": openai_completion
             }
             outputs.append(result)

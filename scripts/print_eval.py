@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Load JSON data
-with open('../data/eval_ragas.json', 'r') as f:
+with open('../data/eval/eval_ragas.json', 'r') as f:
     rag_data = json.load(f)
 
-with open('../data/eval.json', 'r') as f:
+with open('../data/eval/eval.json', 'r') as f:
     eval_data = json.load(f)
 
 # Create path-indexed dictionary for quick lookup
