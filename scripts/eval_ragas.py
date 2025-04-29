@@ -8,8 +8,9 @@ from dotenv import load_dotenv
 from dotenv import dotenv_values
 
 from datasets import Dataset
-from ragas import evaluate
-from ragas.metrics import Faithfulness, AnswerRelevancy
+from ragas import evaluate,RunConfig
+from ragas.metrics import Faithfulness, AnswerRelevancy, context_precision, LLMContextPrecisionWithReference
+from ragas.metrics import LLMContextRecall
 
 
 # Load environment variables from .env file
@@ -23,8 +24,8 @@ API_TYPE = os.environ.get("AZURE_OPENAI_TYPE", "azure")
 API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
-ANSWER_PATH = ["../data/fulltext_answers.json", "../data/hybrid_answers.json", "../data/vector_answers.json", "../data/rerank_answers.json"]
-OUTPUT_FILE_EVALUATION = '../data/eval/eval_ragas.json'
+ANSWER_PATH = ["../data/fulltext_answers.json", "../data/vector_answers.json", "../data/hybrid_answers.json", "../data/rerank_answers.json"]
+OUTPUT_FILE_EVALUATION = '../data/eval_ragas.json'
 
 API_VERSION_EMBEDDING = os.getenv("AZURE_API_VERSION_EMBEDDING")
 ENGINE_EMBEDDING = os.getenv("AZURE_ENGINE_EMBEDDING")
@@ -43,7 +44,7 @@ azure_embeddings = AzureOpenAIEmbeddings(
     api_key=API_KEY_EMBEDDING,
     api_version=API_VERSION_EMBEDDING,
     azure_deployment="text-embedding-3-large",
-    model="text-embedding-ada-002"
+    model="text-embedding-3-large"
 )
 
 
@@ -76,28 +77,32 @@ if __name__ == "__main__":
 
                 for doc in data:
                     question = doc.get('question')
-                    context = doc.get('context')
+                    contexts = doc.get('retrieved_context')
                     ref_anwser = doc.get('ref_answer')
                     generated_answer = doc.get('generated_answer')
 
                     dataset_dict = {
                         "question": [question],
                         "answer": [generated_answer],
-                        "contexts": [[context]],
+                        "contexts": [contexts],
                         "ground_truth": [
                             ref_anwser]
                     }
 
+                    run_config = RunConfig(timeout=120)
                     dataset = Dataset.from_dict(dataset_dict)
                     metrics = [
                         Faithfulness(llm=ragas_llm),
-                        AnswerRelevancy(llm=ragas_llm, embeddings=ragas_embeddings)
+                        AnswerRelevancy(llm=ragas_llm, embeddings=ragas_embeddings),
+                        LLMContextPrecisionWithReference(llm=ragas_llm),  # Measures if relevant items in context are ranked higher[2]
+                        LLMContextRecall(llm=ragas_llm)
                     ]
 
                     # Run evaluation
                     result = evaluate(
                         dataset=dataset,
-                        metrics=metrics
+                        metrics=metrics,
+                        run_config=run_config
                     )
 
                     # Convert to pandas and save results
@@ -125,10 +130,19 @@ if __name__ == "__main__":
                     #print(f"Context Recall: {result['context_recall']:.2f}")
 
 
+                    if isinstance(result['llm_context_precision_with_reference'], list):
+                        avg_score = sum(result['llm_context_precision_with_reference']) / len(result['llm_context_precision_with_reference'])
+                        print(f"Context precision: {avg_score:.2f}")
+                        total_scores_context_precision.extend(result['llm_context_precision_with_reference'])
+                    else:  # Handle single-sample edge case
+                        print(f"Context precision: {result['llm_context_precision_with_reference']:.2f}")
 
-
-                    #total_scores_context_precision.append(result['context_precision'])
-                    #total_scores_context_recall.append(result['context_recall'])
+                    if isinstance(result['context_recall'], list):
+                        avg_score = sum(result['context_recall']) / len(result['context_recall'])
+                        print(f"Context recall: {avg_score:.2f}")
+                        total_scores_context_recall.extend(result['context_recall'])
+                    else:  # Handle single-sample edge case
+                        print(f"Context recall: {result['context_recall']:.2f}")
 
 
 
@@ -136,28 +150,32 @@ if __name__ == "__main__":
                     print(f"\nfile: {path}")
                     print(f"Total Evaluated: {len(total_scores_faithfulness)} questions")
                     average_score_faithfulness = sum(total_scores_faithfulness) / len(total_scores_faithfulness)
-                    print(f"\nAverage Score Faithfullness: {average_score_faithfulness:.2f}")
+                    print(f"\nAverage Score Faithfulness: {average_score_faithfulness:.2f}")
 
                     average_score_answer_relevancy = sum(total_scores_answer_relevancy) / len(total_scores_faithfulness)
                     print(f"\nAverage Score answer relevancy: {average_score_answer_relevancy:.2f}")
 
 
-                    #average_score_context_precision = sum(total_scores_context_precision) / len(total_scores_context_precision)
-                    #print(f"\nAverage Score context precision: {average_score_context_precision:.2f}/5.00")
+                    average_score_context_precision = sum(total_scores_context_precision) / len(total_scores_context_precision)
+                    print(f"\nAverage Score context precision: {average_score_context_precision:.2f}")
 
 
-                    #average_score_context_recall = sum(total_scores_context_recall) / len(total_scores_context_recall)
-                    #print(f"\nAverage Score context recall: {average_score_context_recall:.2f}/5.00")
+                    average_score_context_recall = sum(total_scores_context_recall) / len(total_scores_context_recall)
+                    print(f"\nAverage Score context recall: {average_score_context_recall:.2f}")
 
 
 
                     result = {
-                        "average_score_faithfullness": average_score_faithfulness,
+                        "average_score_faithfulness": average_score_faithfulness,
                         "average_score_answer_relevancy": average_score_answer_relevancy,
-                        #"average_score_context_precision": average_score_context_precision,
-                        #"average_score_context_recall": average_score_context_recall,
+                        "average_score_context_precision": average_score_context_precision,
+                        "average_score_context_recall": average_score_context_recall,
                         "total_questions": len(total_scores_faithfulness),
                         "path": path,
+                        "total_scores_faithfulness": total_scores_faithfulness,
+                        "total_scores_answer_relevancy": total_scores_answer_relevancy,
+                        "total_scores_context_precision": total_scores_context_precision,
+                        "total_scores_context_recall": total_scores_context_recall
                     }
                     outputs.append(result)
 
