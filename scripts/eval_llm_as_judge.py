@@ -31,7 +31,7 @@ API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
 ANSWER_PATH = ["../data/fulltext_answers.json", "../data/hybrid_answers.json", "../data/vector_answers.json", "../data/rerank_answers.json"]
-OUTPUT_FILE_EVALUATION = '../data/eval/eval.json'
+OUTPUT_FILE_EVALUATION = '../data/eval/medical/big/eval.json'
 
 
 openai_client = AzureOpenAI(api_version=API_VERSION,
