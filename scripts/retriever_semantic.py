@@ -23,7 +23,7 @@ API_TYPE = os.environ.get("AZURE_OPENAI_TYPE", "azure")
 API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
-OUTPUT_FILE_QUESTIONS = '../data/med_ground_truth.json'
+OUTPUT_FILE_QUESTIONS = '/Users/huagechen/PycharmProjects/RagEval/data/multi_question_medical.json'
 OUTPUT_FILE_ANSWERS = '../data/vector_answers.json'
 
 es_client = Elasticsearch(
@@ -39,7 +39,7 @@ openai_client = AzureOpenAI(api_version=API_VERSION,
 
 
 index_source_fields = {
-    "eval-rag-medical-en-1": [
+    "eval-rag-medical-en-multi": [
         "content_semantic"
     ]
 }
@@ -60,7 +60,7 @@ def get_elasticsearch_results(query:str):
                         },
                         "inner_hits": {
                             "size": 50,
-                            "name": "eval-rag-medical-en-1.content_semantic",
+                            "name": "eval-rag-medical-en-multi.content_semantic",
                             "_source": [
                                 "content_semantic.inference.chunks.text"
                             ]
@@ -71,7 +71,7 @@ def get_elasticsearch_results(query:str):
         },
         "size": 3
     }
-    result = es_client.search(index="eval-rag-medical-en-1", body=es_query)
+    result = es_client.search(index="eval-rag-medical-en-multi", body=es_query)
     return result["hits"]["hits"]
 
 
@@ -81,16 +81,16 @@ def create_openai_prompt(results):
     for hit in results:
         inner_hit_path = f"{hit['_index']}.{index_source_fields.get(hit['_index'])[0]}"
         ## For semantic_text matches, we need to extract the text from the inner_hits
-        if 'inner_hits' in hit and inner_hit_path in hit['inner_hits']:
-            context += '\n --- \n'.join(
-                inner_hit['_source']['text'] for inner_hit in hit['inner_hits'][inner_hit_path]['hits']['hits'])
-            for inner_hit in hit['inner_hits'][inner_hit_path]['hits']['hits']:
-                raw_context.append(inner_hit['_source']['text'])
-        else:
-            source_field = index_source_fields.get(hit["_index"])[0]
-            hit_context = hit["_source"][source_field]['text']
-            context += f"{hit_context}\n"
-            raw_context.append(hit_context)
+        # if 'inner_hits' in hit and inner_hit_path in hit['inner_hits']:
+        #     context += '\n --- \n'.join(
+        #         inner_hit['_source']['text'] for inner_hit in hit['inner_hits'][inner_hit_path]['hits']['hits'])
+        #     for inner_hit in hit['inner_hits'][inner_hit_path]['hits']['hits']:
+        #         raw_context.append(inner_hit['_source']['text'])
+        # else:
+        source_field = index_source_fields.get(hit["_index"])[0]
+        hit_context = hit["_source"][source_field]
+        context += f"{hit_context}\n"
+        raw_context.append(hit_context)
     prompt = f"""
     <|system|>
     Using the information contained in the context,
@@ -131,7 +131,7 @@ if __name__ == "__main__":
         data = json.load(file)
         for doc in data:
             question = doc.get('question')
-            context = doc.get('context')
+            context = doc.get('references')
             ref_anwser = doc.get('answer')
             raw_context = []
             time.sleep(random.random() * 1)
