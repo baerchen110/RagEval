@@ -24,7 +24,7 @@ API_TYPE = os.environ.get("AZURE_OPENAI_TYPE", "azure")
 API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
-OUTPUT_FILE_QUESTIONS = '../data/med_ground_truth.json'
+OUTPUT_FILE_QUESTIONS = '/Users/huagechen/PycharmProjects/RagEval/data/multi_question_medical.json'
 OUTPUT_FILE_ANSWERS = '../data/fulltext_answers.json'
 
 es_client = Elasticsearch(
@@ -40,8 +40,8 @@ openai_client = AzureOpenAI(api_version=API_VERSION,
 
 
 index_source_fields = {
-    "eval-rag-medical-en-1": [
-        "content_semantic"
+    "eval-rag-medical-en-multi": [
+        "content"
     ]
 }
 
@@ -58,7 +58,7 @@ def get_elasticsearch_results(query:str):
         },
         "size": 1
     }
-    result = es_client.search(index="eval-rag-medical-en-1", body=es_query)
+    result = es_client.search(index="eval-rag-medical-en-multi", body=es_query)
     return result["hits"]["hits"]
 
 
@@ -75,7 +75,7 @@ def create_openai_prompt(results):
                 raw_context.append(inner_hit['_source']['text'])
         else:
             source_field = index_source_fields.get(hit["_index"])[0]
-            hit_context = hit["_source"][source_field]['text']
+            hit_context = hit["_source"][source_field]
             context += f"{hit_context}\n"
             raw_context.append(hit_context)
     prompt = f"""
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         data = json.load(file)
         for doc in data:
             question = doc.get('question')
-            context = doc.get('context')
+            context = doc.get('references')
             ref_anwser = doc.get('answer')
             raw_context = []
             time.sleep(random.random() * 1)
