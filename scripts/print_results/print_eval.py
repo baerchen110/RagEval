@@ -6,7 +6,7 @@ import numpy as np
 with open('../data/eval/eval_ragas.json', 'r') as f:
     rag_data = json.load(f)
 
-with open('../data/eval/medical/big/eval.json', 'r') as f:
+with open('../../data/eval/medical/big/eval.json', 'r') as f:
     eval_data = json.load(f)
 
 # Create path-indexed dictionary for quick lookup

@@ -13,7 +13,7 @@ from IPython.display import display
 import datasets
 
 # Load environment variables from .env file
-if os.path.exists(".env"):
+if os.path.exists("../.env"):
     load_dotenv(override=True)
 
 API_BASE = os.getenv("AZURE_OPENAI_BASE")
@@ -22,8 +22,8 @@ API_TYPE = os.environ.get("AZURE_OPENAI_TYPE", "azure")
 API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
-RAW_DATA_FILE = "../data/dragonball_docs_med_en_1.json"
-OUTPUT_GROUND_TRUTH_FILE = "../data/med_ground_truth.json"
+RAW_DATA_FILE = "../../data/raw/dragonball_docs_med_en.json"
+OUTPUT_GROUND_TRUTH_FILE = "../../data/eval/medical/small/med_ground_truth.json"
 
 loader = JSONLoader(
     file_path=RAW_DATA_FILE,
@@ -240,8 +240,8 @@ display(
 )
 generated_questions = generated_questions.loc[
     (generated_questions["groundedness_score"] >= 4)
-    & (generated_questions["relevance_score"] >= 3)
-    & (generated_questions["standalone_score"] >= 3)
+    & (generated_questions["relevance_score"] >= 2)
+    & (generated_questions["standalone_score"] >= 2)
 ]
 print("============================================")
 print("Final evaluation dataset:")

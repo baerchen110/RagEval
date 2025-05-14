@@ -11,9 +11,9 @@ import time
 import random
 
 # Load environment variables from .env file
-if os.path.exists(".env"):
+if os.path.exists("../.env"):
     load_dotenv(override=True)
-    config = dotenv_values(".env")
+    config = dotenv_values("../.env")
 
 API_BASE = os.getenv("AZURE_OPENAI_BASE")
 API_KEY = os.getenv("AZURE_OPENAI_KEY")
@@ -21,7 +21,7 @@ API_TYPE = os.environ.get("AZURE_OPENAI_TYPE", "azure")
 API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
-OUTPUT_FILE_QUESTIONS = '/Users/huagechen/PycharmProjects/RagEval/data/multi_question_medical_slim.json'
+OUTPUT_FILE_QUESTIONS = '/data/multi_question_medical_slim.json'
 OUTPUT_FILE_ANSWERS = '../data/rerank_answers.json'
 CID = os.getenv("ES_CID")
 ES_USER = os.getenv("ES_USER")

@@ -1,21 +1,18 @@
 ## Install the required packages
-## pip install -qU elasticsearch openai
 from elasticsearch import Elasticsearch
-from openai import OpenAI
 from dotenv import load_dotenv
 from dotenv import dotenv_values
 import os
-import json
 from openai import AzureOpenAI
 import pandas as pd
 import time
 import random
-
+import json
 
 # Load environment variables from .env file
-if os.path.exists(".env"):
+if os.path.exists("../.env"):
     load_dotenv(override=True)
-    config = dotenv_values(".env")
+    config = dotenv_values("../.env")
 
 API_BASE = os.getenv("AZURE_OPENAI_BASE")
 API_KEY = os.getenv("AZURE_OPENAI_KEY")
@@ -23,8 +20,8 @@ API_TYPE = os.environ.get("AZURE_OPENAI_TYPE", "azure")
 API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
-OUTPUT_FILE_QUESTIONS = '/Users/huagechen/PycharmProjects/RagEval/data/multi_question_medical.json'
-OUTPUT_FILE_ANSWERS = '../data/vector_answers.json'
+OUTPUT_FILE_QUESTIONS = '../../data/eval/medical/small/med_ground_truth.json'
+OUTPUT_FILE_ANSWERS = '../../data/archive/hybrid_answers.json'
 
 es_client = Elasticsearch(
     cloud_id=os.environ["ES_CID"],
@@ -47,28 +44,45 @@ index_source_fields = {
 def get_elasticsearch_results(query:str):
     es_query = {
         "retriever": {
-            "standard": {
-                "query": {
-                    "nested": {
-                        "path": "content_semantic.inference.chunks",
-                        "query": {
-                            "sparse_vector": {
-                                "inference_id": "my-elser-endpoint",
-                                "field": "content_semantic.inference.chunks.embeddings",
-                                "query": query
-                            }
-                        },
-                        "inner_hits": {
-                            "size": 50,
-                            "name": "eval-rag-medical-en-multi.content_semantic",
-                            "_source": [
-                                "content_semantic.inference.chunks.text"
-                            ]
-                        }
+            "rrf": {
+              "retrievers": [
+                {
+                  "standard": {
+                    "query": {
+                      "match": {
+                        "content": query
+                      }
                     }
+                  }
+                },
+                {
+                  "standard": {
+                    "query": {
+                            "nested": {
+                                "path": "content_semantic.inference.chunks",
+                                "query": {
+                                    "sparse_vector": {
+                                        "inference_id": "my-elser-endpoint",
+                                        "field": "content_semantic.inference.chunks.embeddings",
+                                        "query": query
+                                    }
+                                },
+                                "inner_hits": {
+                                    "size": 50,
+                                    "name": "eval-rag-medical-en-multi.content_semantic",
+                                    "_source": [
+                                        "content_semantic.inference.chunks.text"
+                                    ]
+                                }
+                            }
+                        }
+                  }
                 }
+              ],
+              "rank_window_size": 20,
+              "rank_constant": 200
             }
-        },
+          },
         "size": 3
     }
     result = es_client.search(index="eval-rag-medical-en-multi", body=es_query)

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # --- Configuration ---
-DEFAULT_JSON_PATH = '../data/eval_ragas.json'
+DEFAULT_JSON_PATH = '../../data/archive/bge_e5.json'
 MAX_SCORE = 1.0  # Used to normalize scores to percentage
 
 # Define metrics and colors
@@ -119,8 +119,8 @@ def plot_violinplots(plot_data, doc_names, metrics):
         plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=color, label=name.replace('_', ' ').capitalize(), markersize=10)
         for name, color in metrics
     ]
-    plt.legend(handles=legend_elements, loc='upper right')
-    plt.suptitle('RAG Evaluation Metrics by Document', fontsize=16, y=1.02)
+    plt.legend(handles=legend_elements, loc='lower right')
+    plt.suptitle('RAG Evaluation Metrics by Document', fontsize=16, y=1.05)
     plt.tight_layout(rect=[0, 0, 1, 0.97])
     plt.show()
 

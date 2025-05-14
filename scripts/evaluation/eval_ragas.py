@@ -14,9 +14,9 @@ from ragas.metrics import LLMContextRecall
 
 
 # Load environment variables from .env file
-if os.path.exists(".env"):
+if os.path.exists("../.env"):
     load_dotenv(override=True)
-    config = dotenv_values(".env")
+    config = dotenv_values("../.env")
 
 API_BASE = os.getenv("AZURE_OPENAI_BASE")
 API_KEY = os.getenv("AZURE_OPENAI_KEY")
@@ -24,8 +24,8 @@ API_TYPE = os.environ.get("AZURE_OPENAI_TYPE", "azure")
 API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
-ANSWER_PATH = ["../data/fulltext_answers.json", "../data/vector_answers.json", "../data/hybrid_answers.json", "../data/rerank_answers.json"]
-OUTPUT_FILE_EVALUATION = '../data/eval_ragas.json'
+ANSWER_PATH = ["../data/law_en_fulltext_answers.json","../data/law_en_bge_answers.json", "../data/law_en_hybrid_bge_answers.json", "../data/law_en_hybrid_linear_bge_answers.json", "../data/law_en_hybrid_rerank_bge_answers.json"]
+OUTPUT_FILE_EVALUATION = '../../data/eval/medical/multi/eval_ragas.json'
 
 API_VERSION_EMBEDDING = os.getenv("AZURE_API_VERSION_EMBEDDING")
 ENGINE_EMBEDDING = os.getenv("AZURE_ENGINE_EMBEDDING")
@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
                 for doc in data:
                     question = doc.get('question')
-                    contexts = doc.get('retrieved_context')
+                    contexts = doc.get('raw_context')
                     ref_anwser = doc.get('ref_answer')
                     generated_answer = doc.get('generated_answer')
 

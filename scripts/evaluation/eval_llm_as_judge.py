@@ -20,9 +20,9 @@ from langchain.prompts.chat import (
 from langchain.schema import SystemMessage
 
 # Load environment variables from .env file
-if os.path.exists(".env"):
+if os.path.exists("../.env"):
     load_dotenv(override=True)
-    config = dotenv_values(".env")
+    config = dotenv_values("../.env")
 
 API_BASE = os.getenv("AZURE_OPENAI_BASE")
 API_KEY = os.getenv("AZURE_OPENAI_KEY")
@@ -31,7 +31,7 @@ API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
 ANSWER_PATH = ["../data/fulltext_answers.json", "../data/hybrid_answers.json", "../data/vector_answers.json", "../data/rerank_answers.json"]
-OUTPUT_FILE_EVALUATION = '../data/eval/medical/big/eval.json'
+OUTPUT_FILE_EVALUATION = '../../data/eval/medical/multi/eval.json'
 
 
 openai_client = AzureOpenAI(api_version=API_VERSION,
@@ -107,8 +107,8 @@ if __name__ == "__main__":
                 for doc in data:
 
                     question = doc.get('question')
-                    context = doc.get('context')
-                    ref_anwser = doc.get('answer')
+                    context = doc.get('retrieved_context')
+                    ref_anwser = doc.get('ref_answer')
                     generated_answer = doc.get('generated_answer')
 
                     eval_prompt = evaluation_prompt_template.format_messages(

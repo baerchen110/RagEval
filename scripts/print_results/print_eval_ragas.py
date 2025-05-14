@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 # Load the JSON data
-json_path = '../data/eval_ragas.json'
+json_path = '../../data/eval/law/en/bg3/eval_ragas.json'
 with open(json_path, 'r') as f:
     data = json.load(f)
 

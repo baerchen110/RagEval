@@ -12,11 +12,10 @@ import time
 import random
 
 
-
 # Load environment variables from .env file
-if os.path.exists(".env"):
+if os.path.exists("../.env"):
     load_dotenv(override=True)
-    config = dotenv_values(".env")
+    config = dotenv_values("../.env")
 
 API_BASE = os.getenv("AZURE_OPENAI_BASE")
 API_KEY = os.getenv("AZURE_OPENAI_KEY")
@@ -24,8 +23,8 @@ API_TYPE = os.environ.get("AZURE_OPENAI_TYPE", "azure")
 API_VERSION = os.getenv("AZURE_OPENAI_VERSION")
 ENGINE = os.getenv("AZURE_OPENAI_DEPLOYMENT")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
-OUTPUT_FILE_QUESTIONS = '/Users/huagechen/PycharmProjects/RagEval/data/multi_question_medical.json'
-OUTPUT_FILE_ANSWERS = '../data/fulltext_answers.json'
+OUTPUT_FILE_QUESTIONS = '/data/multi_question_medical.json'
+OUTPUT_FILE_ANSWERS = '../data/vector_answers.json'
 
 es_client = Elasticsearch(
     cloud_id=os.environ["ES_CID"],
@@ -41,7 +40,7 @@ openai_client = AzureOpenAI(api_version=API_VERSION,
 
 index_source_fields = {
     "eval-rag-medical-en-multi": [
-        "content"
+        "content_semantic"
     ]
 }
 
@@ -50,13 +49,27 @@ def get_elasticsearch_results(query:str):
         "retriever": {
             "standard": {
                 "query": {
-                  "match": {
-                    "content": query
-                  }
+                    "nested": {
+                        "path": "content_semantic.inference.chunks",
+                        "query": {
+                            "sparse_vector": {
+                                "inference_id": "my-elser-endpoint",
+                                "field": "content_semantic.inference.chunks.embeddings",
+                                "query": query
+                            }
+                        },
+                        "inner_hits": {
+                            "size": 50,
+                            "name": "eval-rag-medical-en-multi.content_semantic",
+                            "_source": [
+                                "content_semantic.inference.chunks.text"
+                            ]
+                        }
+                    }
                 }
             }
         },
-        "size": 1
+        "size": 3
     }
     result = es_client.search(index="eval-rag-medical-en-multi", body=es_query)
     return result["hits"]["hits"]
@@ -68,16 +81,16 @@ def create_openai_prompt(results):
     for hit in results:
         inner_hit_path = f"{hit['_index']}.{index_source_fields.get(hit['_index'])[0]}"
         ## For semantic_text matches, we need to extract the text from the inner_hits
-        if 'inner_hits' in hit and inner_hit_path in hit['inner_hits']:
-            context += '\n --- \n'.join(
-                inner_hit['_source']['text'] for inner_hit in hit['inner_hits'][inner_hit_path]['hits']['hits'])
-            for inner_hit in hit['inner_hits'][inner_hit_path]['hits']['hits']:
-                raw_context.append(inner_hit['_source']['text'])
-        else:
-            source_field = index_source_fields.get(hit["_index"])[0]
-            hit_context = hit["_source"][source_field]
-            context += f"{hit_context}\n"
-            raw_context.append(hit_context)
+        # if 'inner_hits' in hit and inner_hit_path in hit['inner_hits']:
+        #     context += '\n --- \n'.join(
+        #         inner_hit['_source']['text'] for inner_hit in hit['inner_hits'][inner_hit_path]['hits']['hits'])
+        #     for inner_hit in hit['inner_hits'][inner_hit_path]['hits']['hits']:
+        #         raw_context.append(inner_hit['_source']['text'])
+        # else:
+        source_field = index_source_fields.get(hit["_index"])[0]
+        hit_context = hit["_source"][source_field]
+        context += f"{hit_context}\n"
+        raw_context.append(hit_context)
     prompt = f"""
     <|system|>
     Using the information contained in the context,
@@ -123,7 +136,7 @@ if __name__ == "__main__":
             raw_context = []
             time.sleep(random.random() * 1)
             elasticsearch_results = get_elasticsearch_results(question)
-            context_prompt,raw_context = create_openai_prompt(elasticsearch_results)
+            context_prompt, raw_context = create_openai_prompt(elasticsearch_results)
             openai_completion = generate_openai_completion(context_prompt, question)
             print(f"\n**Question :**")
             print(question)
