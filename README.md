@@ -9,10 +9,20 @@ pip install -r requirements.txt
 
 run imports sample
 ```console
-python import.py
+python ground_truth_generation/import.py
+```
+run different rag scenarios
+```console
+python rag_scenarios/retriever_xxx.py
 ```
 
-run different rag scripts
+run different evaluation scripts
 ```console
-python retriever.py
+python evaluation/eval_xxx.py
 ```
+
+run result printing  scripts
+```console
+python print_results/print_xxx.py
+```
+
